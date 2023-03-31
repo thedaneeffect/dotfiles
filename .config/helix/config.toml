@@ -1,0 +1,5 @@
+
+theme="gruvbox_material_dark_hard"
+
+[editor]
+line-number ="relative"
