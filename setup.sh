@@ -243,7 +243,7 @@ select_components() {
         INSTALL_EDITOR_CONFIGS=true
         INSTALL_FONTS=true
         INSTALL_GIT_CONFIG=true
-        INSTALL_SECRETS=true
+        INSTALL_COFFER=true
         INSTALL_TERMINAL_SETTINGS=true
         INSTALL_CLAUDE=true
         return 0
@@ -256,7 +256,7 @@ select_components() {
 
     # Component mapping: parallel arrays for display prefixes and variable names
     local component_prefixes=("Shell configuration" "Editor configs" "Fonts" "Git configuration" "Coffer management" "Terminal settings" "Claude CLI")
-    local component_vars=(INSTALL_SHELL_CONFIG INSTALL_EDITOR_CONFIGS INSTALL_FONTS INSTALL_GIT_CONFIG INSTALL_SECRETS INSTALL_TERMINAL_SETTINGS INSTALL_CLAUDE)
+    local component_vars=(INSTALL_SHELL_CONFIG INSTALL_EDITOR_CONFIGS INSTALL_FONTS INSTALL_GIT_CONFIG INSTALL_COFFER INSTALL_TERMINAL_SETTINGS INSTALL_CLAUDE)
 
     # Initialize all to false
     # WHY eval: Bash 3.2 requires eval for dynamic variable assignment in function scope
@@ -483,30 +483,33 @@ configure_coffer() {
         return 0
     fi
 
-    # Ensure .zshrc exists
-    touch "$RC_FILE"
+    # Create ~/.config/zsh.d/ directory if it doesn't exist
+    mkdir -p "$HOME/.config/zsh.d"
 
-    # Remove old secrets section if exists
-    if grep -qF "# dotfiles-secrets-start" "$RC_FILE"; then
-        # WHY .bak then rm: macOS sed -i requires a backup extension
-        sed -i.bak '/# dotfiles-secrets-start/,/# dotfiles-secrets-end/d' "$RC_FILE"
-        rm -f "$RC_FILE.bak"
-    fi
-
-    # Append secrets with delimiters
-    cat >> "$RC_FILE" << EOF
-
-# dotfiles-coffer-start
+    # Write credentials to ~/.config/zsh.d/coffer.zsh (not tracked in git)
+    cat > "$HOME/.config/zsh.d/coffer.zsh" << EOF
 export COFFER_URL="$url"
 export COFFER_PASSPHRASE="$passphrase"
-# dotfiles-coffer-end
 EOF
+
+    # Clean up old coffer sections from .zshrc if they exist
+    if [[ -f "$RC_FILE" ]]; then
+        if grep -qF "# dotfiles-coffer-start" "$RC_FILE"; then
+            sed -i.bak '/# dotfiles-coffer-start/,/# dotfiles-coffer-end/d' "$RC_FILE"
+            rm -f "$RC_FILE.bak"
+        fi
+        # Also clean up old secrets markers
+        if grep -qF "# dotfiles-secrets-start" "$RC_FILE"; then
+            sed -i.bak '/# dotfiles-secrets-start/,/# dotfiles-secrets-end/d' "$RC_FILE"
+            rm -f "$RC_FILE.bak"
+        fi
+    fi
 
     # WHY: Export for current session so setup_gpg_key can use them immediately
     export COFFER_URL="$url"
     export COFFER_PASSPHRASE="$passphrase"
 
-    echo "✓ Configured coffer"
+    echo "✓ Configured coffer (credentials saved to ~/.config/zsh.d/coffer.zsh)"
 }
 
 # Setup GPG key for commit signing
@@ -605,7 +608,7 @@ main() {
 
     [[ "$INSTALL_GIT_CONFIG" == true ]] && configure_git
 
-    if [[ "$INSTALL_SECRETS" == true ]]; then
+    if [[ "$INSTALL_COFFER" == true ]]; then
         configure_coffer
         install_coffer_cli
         setup_gpg_key

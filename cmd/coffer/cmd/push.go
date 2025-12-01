@@ -53,9 +53,9 @@ var pushCmd = &cobra.Command{
 			return err
 		}
 		if isEmpty {
-			ui.Error("No secrets to push for group: %s", grp)
-			ui.Warning("Add secrets with: coffer add <path> -g %s", grp)
-			return fmt.Errorf("no secrets to push")
+			ui.Error("No files to push for group: %s", grp)
+			ui.Warning("Add files with: coffer add <path> -g %s", grp)
+			return fmt.Errorf("no files to push")
 		}
 
 		// Get all tracked files

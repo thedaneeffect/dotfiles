@@ -117,7 +117,7 @@ alias grep='grep --color=auto'
 alias rc='$EDITOR ~/.$(basename $SHELL)rc'
 alias myip='curl -s ifconfig.me'
 alias ports='lsof -i -P -n | grep LISTEN'
-alias bootstrap='bash <(curl -fsSL https://secrets.medieval.software/bootstrap) && source ~/.zshrc'
+alias bootstrap='bash <(curl -fsSL https://coffer.medieval.software/bootstrap) && source ~/.zshrc'
 
 # ============================================================================
 # System-specific overrides

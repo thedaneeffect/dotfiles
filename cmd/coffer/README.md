@@ -6,7 +6,7 @@ Medieval-themed CLI for managing encrypted dotfiles.
 
 ## Features
 
-- **Local registry** - Track files in `~/.coffer` (or `~/.coffer.<group>`)
+- **Local registry** - Track files in `~/.local/share/coffer/` (XDG compliant)
 - **Encrypted sync** - Push/pull to Cloudflare Workers
 - **Groups** - Organize files by purpose (github, work, personal, etc.)
 - **OpenSSL compatible** - AES-256-CBC with PBKDF2
@@ -33,7 +33,7 @@ The setup script automatically runs `go install` if Go is available.
 coffer add ~/.ssh/id_rsa ~/.env
 
 # Configure worker (optional, for sync)
-export COFFER_URL="https://secrets.your-subdomain.workers.dev"
+export COFFER_URL="https://coffer.your-subdomain.workers.dev"
 export COFFER_PASSPHRASE="your-passphrase"
 
 # Push to worker
@@ -87,17 +87,17 @@ coffer push github
 coffer pull work
 ```
 
-Each group has its own registry file:
-- `~/.coffer` (default)
-- `~/.coffer.github`
-- `~/.coffer.work`
+Each group has its own registry file in `~/.local/share/coffer/`:
+- `default.registry` (default group)
+- `github.registry` (github group)
+- `work.registry` (work group)
 
 ## Configuration
 
 Set environment variables:
 
 ```bash
-export COFFER_URL="https://secrets.your-subdomain.workers.dev"
+export COFFER_URL="https://coffer.your-subdomain.workers.dev"
 export COFFER_PASSPHRASE="your-secret-passphrase"
 ```
 

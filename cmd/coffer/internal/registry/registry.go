@@ -7,11 +7,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/thedaneeffect/dotfiles/cmd/coffer/internal/config"
 	"github.com/thedaneeffect/dotfiles/cmd/coffer/internal/ui"
 )
 
-// Registry manages a local secrets registry file
+// Registry manages a local coffer registry file
 type Registry struct {
 	Group string
 	Path  string
@@ -30,10 +29,15 @@ func New(group string) (*Registry, error) {
 		return nil, fmt.Errorf("failed to get home directory: %w", err)
 	}
 
-	registryPath := filepath.Join(homeDir, ".coffer")
-	if group != config.DefaultGroup {
-		registryPath = filepath.Join(homeDir, fmt.Sprintf(".coffer.%s", group))
+	// Use XDG_DATA_HOME or default to ~/.local/share
+	dataHome := os.Getenv("XDG_DATA_HOME")
+	if dataHome == "" {
+		dataHome = filepath.Join(homeDir, ".local", "share")
 	}
+
+	// Registry stored in ~/.local/share/coffer/<group>.registry
+	cofferDir := filepath.Join(dataHome, "coffer")
+	registryPath := filepath.Join(cofferDir, fmt.Sprintf("%s.registry", group))
 
 	return &Registry{
 		Group: group,
@@ -44,6 +48,12 @@ func New(group string) (*Registry, error) {
 // Init creates the registry file if it doesn't exist
 func (r *Registry) Init() error {
 	if _, err := os.Stat(r.Path); os.IsNotExist(err) {
+		// Create parent directory if needed
+		dir := filepath.Dir(r.Path)
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			return fmt.Errorf("failed to create coffer directory: %w", err)
+		}
+
 		f, err := os.Create(r.Path)
 		if err != nil {
 			return fmt.Errorf("failed to create registry: %w", err)

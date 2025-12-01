@@ -20,7 +20,7 @@ var deleteCmd = &cobra.Command{
 	Short:   "Delete group from worker",
 	Long:    `Delete a secret group from the Cloudflare Worker.`,
 	Example: `  coffer delete github
-  secrets del test-group`,
+  coffer del test-group`,
 	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// Determine group (from args or flag)

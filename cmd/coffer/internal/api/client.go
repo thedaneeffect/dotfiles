@@ -16,7 +16,7 @@ type Client struct {
 	HTTPClient *http.Client
 }
 
-// Metadata contains information about uploaded secrets
+// Metadata contains information about uploaded files
 type Metadata struct {
 	Files []string `json:"files"`
 	Size  string   `json:"size"`
@@ -40,7 +40,7 @@ func NewClient(baseURL, passphrase string) *Client {
 	}
 }
 
-// Push uploads encrypted secrets to the worker
+// Push uploads encrypted files to the worker
 func (c *Client) Push(group string, data string, metadata Metadata) error {
 	url := fmt.Sprintf("%s/secrets/%s", c.BaseURL, group)
 
@@ -84,7 +84,7 @@ func (c *Client) Push(group string, data string, metadata Metadata) error {
 	return nil
 }
 
-// Pull downloads encrypted secrets from the worker
+// Pull downloads encrypted files from the worker
 func (c *Client) Pull(group string) (string, error) {
 	url := fmt.Sprintf("%s/secrets/%s", c.BaseURL, group)
 
@@ -103,7 +103,7 @@ func (c *Client) Pull(group string) (string, error) {
 
 	switch resp.StatusCode {
 	case http.StatusNotFound:
-		return "", fmt.Errorf("no secrets found for group: %s", group)
+		return "", fmt.Errorf("no files found for group: %s", group)
 	case http.StatusUnauthorized:
 		return "", fmt.Errorf("unauthorized - check COFFER_PASSPHRASE")
 	case http.StatusForbidden:

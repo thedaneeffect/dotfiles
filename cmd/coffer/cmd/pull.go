@@ -15,7 +15,7 @@ import (
 var pullCmd = &cobra.Command{
 	Use:   "pull [group]",
 	Short: "Download files from worker",
-	Long:  `Download and decrypt secrets from Cloudflare Worker.`,
+	Long:  `Download and decrypt files from Cloudflare Worker.`,
 	Example: `  coffer pull
   coffer pull github`,
 	Args: cobra.MaximumNArgs(1),
@@ -49,7 +49,7 @@ var pullCmd = &cobra.Command{
 		}
 
 		// Base64 decode
-		ui.Info("Decoding and decrypting secrets...")
+		ui.Info("Decoding and decrypting files...")
 		encrypted, err := crypto.DecodeBase64(base64Data)
 		if err != nil {
 			return fmt.Errorf("failed to decode base64: %w", err)

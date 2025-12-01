@@ -16,7 +16,7 @@ var removeCmd = &cobra.Command{
 	Short:   "Remove files from coffer registry",
 	Long:    `Remove files from the coffer registry.`,
 	Example: `  coffer remove ~/.ssh/id_rsa
-  secrets rm ~/.env -g work`,
+  coffer rm ~/.env -g work`,
 	Args: cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// Show group being used if not default

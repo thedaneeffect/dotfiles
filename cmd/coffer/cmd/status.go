@@ -15,8 +15,8 @@ var statusCmd = &cobra.Command{
 	Aliases: []string{"st"},
 	Short:   "Show status of tracked files",
 	Long:    `Show status of tracked files, including which files exist and which are missing.`,
-	Example: `  secrets status
-  secrets st github`,
+	Example: `  coffer status
+  coffer st github`,
 	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// Determine group (from args or flag)
@@ -43,14 +43,14 @@ var statusCmd = &cobra.Command{
 		}
 
 		if isEmpty {
-			ui.Warning("No secrets tracked for group: %s", grp)
+			ui.Warning("No files tracked for group: %s", grp)
 			return nil
 		}
 
 		// Get entries
 		entries, err := reg.List()
 		if err != nil {
-			return fmt.Errorf("failed to list secrets: %w", err)
+			return fmt.Errorf("failed to list files: %w", err)
 		}
 
 		// Count existing vs missing

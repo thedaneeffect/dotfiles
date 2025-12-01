@@ -17,7 +17,7 @@ var listCmd = &cobra.Command{
 	Short:   "List tracked files",
 	Long:    `List all files tracked in the coffer registry.`,
 	Example: `  coffer list
-  secrets ls github`,
+  coffer ls github`,
 	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// Determine group (from args or flag)
@@ -44,7 +44,7 @@ var listCmd = &cobra.Command{
 		}
 
 		if isEmpty {
-			ui.Warning("No secrets tracked locally for group: %s", grp)
+			ui.Warning("No files tracked locally for group: %s", grp)
 			ui.Warning("Use: coffer add <path> -g %s", grp)
 			return nil
 		}
@@ -53,7 +53,7 @@ var listCmd = &cobra.Command{
 		ui.Success("Locally tracked files:")
 		entries, err := reg.List()
 		if err != nil {
-			return fmt.Errorf("failed to list secrets: %w", err)
+			return fmt.Errorf("failed to list files: %w", err)
 		}
 
 		for _, entry := range entries {
@@ -69,7 +69,7 @@ var listCmd = &cobra.Command{
 		// Show remote metadata if worker is configured
 		cfg, err := config.Load()
 		if err == nil && cfg.URL != "" && cfg.Passphrase != "" {
-			ui.Success("Remote secrets (in worker):")
+			ui.Success("Remote files (in worker):")
 
 			client := api.NewClient(cfg.URL, cfg.Passphrase)
 			metadata, err := client.GetMetadata()
@@ -80,7 +80,7 @@ var listCmd = &cobra.Command{
 
 			groupMeta, exists := metadata[grp]
 			if !exists {
-				ui.Warning("  (no secrets in worker for this group)")
+				ui.Warning("  (no files in worker for this group)")
 			} else {
 				if len(groupMeta.Files) == 0 {
 					ui.Warning("  (no files)")
@@ -93,7 +93,7 @@ var listCmd = &cobra.Command{
 				}
 			}
 		} else {
-			ui.Warning("Remote secrets: (COFFER_URL/COFFER_PASSPHRASE not configured)")
+			ui.Warning("Remote files: (COFFER_URL/COFFER_PASSPHRASE not configured)")
 		}
 
 		return nil
