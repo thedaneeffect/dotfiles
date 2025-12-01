@@ -111,8 +111,6 @@ alias miu='mise upgrade'
 alias mis='mise use'
 alias mil='mise list'
 alias mio='mise outdated'
-alias mise-doctor='mise doctor'
-alias mise-versions='mise list --installed'
 
 # Utilities
 alias grep='grep --color=auto'
