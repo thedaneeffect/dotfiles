@@ -102,6 +102,7 @@ alias gds='git diff --staged'
 alias gl='git log'
 alias gcob='git branch | fzf | xargs git checkout'
 alias glf='git log --oneline | fzf --preview "git show {1}"'
+alias gp='git push'
 
 # mise shortcuts
 alias mi='mise'
