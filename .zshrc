@@ -87,9 +87,9 @@ alias ..='cd ..'
 alias ...='cd ../..'
 
 # Modern replacements
-alias l='eza -l'
-alias ls='eza -l'
-alias ll='eza -ll'
+alias l='eza -la'
+alias ls='eza -la'
+alias ll='eza -la'
 alias la='eza -la'
 alias tree='eza --tree'
 

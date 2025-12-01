@@ -255,7 +255,7 @@ select_components() {
         "Select components to install:"
 
     # Component mapping: parallel arrays for display prefixes and variable names
-    local component_prefixes=("Shell configuration" "Editor configs" "Fonts" "Git configuration" "Secrets management" "Terminal settings" "Claude CLI")
+    local component_prefixes=("Shell configuration" "Editor configs" "Fonts" "Git configuration" "Coffer management" "Terminal settings" "Claude CLI")
     local component_vars=(INSTALL_SHELL_CONFIG INSTALL_EDITOR_CONFIGS INSTALL_FONTS INSTALL_GIT_CONFIG INSTALL_SECRETS INSTALL_TERMINAL_SETTINGS INSTALL_CLAUDE)
 
     # Initialize all to false
@@ -270,7 +270,7 @@ select_components() {
         "Editor configs (Helix, Zellij)" \
         "Fonts" \
         "Git configuration (GPG signing)" \
-        "Secrets management (Cloudflare Worker)" \
+        "Coffer management (Cloudflare Worker)" \
         "Terminal settings (iTerm2, Windows Terminal)" \
         "Claude CLI")
 
@@ -432,49 +432,54 @@ configure_claude_instructions() {
     fi
 }
 
-# Install secrets management CLI
-install_secrets_cli() {
-    local secrets_script="$SCRIPT_DIR/secrets"
-    local secrets_dest="$HOME/.local/bin/secrets"
+# Install coffer CLI (Go implementation)
+install_coffer_cli() {
+    echo "→ Installing coffer CLI (Go implementation)..."
 
-    if [[ ! -f "$secrets_script" ]]; then
-        echo "⊘ Skipping secrets CLI (script not found)"
+    # Check if Go is available
+    if ! command -v go &> /dev/null; then
+        echo "⊘ Go not found, skipping coffer CLI installation"
+        echo "  (mise will install it later)"
         return 0
     fi
 
-    # Ensure target directory exists
-    mkdir -p "$HOME/.local/bin"
-
-    # Symlink secrets CLI
-    if symlink_config "$secrets_script" "$secrets_dest"; then
-        echo "✓ Symlinked secrets CLI"
+    # Install from local source
+    if [[ -d "$SCRIPT_DIR/cmd/coffer" ]]; then
+        if (cd "$SCRIPT_DIR/cmd/coffer" && go install); then
+            echo "✓ Installed coffer CLI from source"
+        else
+            echo "⊘ Failed to install coffer CLI"
+            echo "  (mise will retry later)"
+        fi
+    else
+        echo "⊘ coffer source not found at $SCRIPT_DIR/cmd/coffer"
     fi
 }
 
-# Configure secrets (prompt for URL and passphrase)
-configure_secrets() {
+# Configure coffer (prompt for URL and passphrase)
+configure_coffer() {
     # Skip if already configured via environment
-    if [[ -n "${SECRETS_URL:-}" ]] && [[ -n "${SECRETS_PASSPHRASE:-}" ]]; then
+    if [[ -n "${COFFER_URL:-}" ]] && [[ -n "${COFFER_PASSPHRASE:-}" ]]; then
         return 0
     fi
 
-    echo "→ Configuring secrets storage..."
+    echo "→ Configuring coffer storage..."
     echo ""
-    echo "Secrets are stored in Cloudflare Workers. You'll need:"
-    echo "  1. Your worker URL (e.g., https://secrets.your-subdomain.workers.dev)"
+    echo "Files are stored in Cloudflare Workers. You'll need:"
+    echo "  1. Your worker URL (e.g., https://coffer.your-subdomain.workers.dev)"
     echo "  2. Your passphrase for authentication"
     echo ""
-    read -p "Enter your secrets worker URL (or press Enter to skip): " url
-    
+    read -p "Enter your coffer worker URL (or press Enter to skip): " url
+
     if [[ -z "$url" ]]; then
-        echo "⊘ Skipping secrets configuration"
+        echo "⊘ Skipping coffer configuration"
         return 0
     fi
 
-    read -p "Enter your secrets passphrase: " passphrase
+    read -p "Enter your coffer passphrase: " passphrase
 
     if [[ -z "$passphrase" ]]; then
-        echo "⊘ Skipping secrets configuration (no passphrase provided)"
+        echo "⊘ Skipping coffer configuration (no passphrase provided)"
         return 0
     fi
 
@@ -491,17 +496,17 @@ configure_secrets() {
     # Append secrets with delimiters
     cat >> "$RC_FILE" << EOF
 
-# dotfiles-secrets-start
-export SECRETS_URL="$url"
-export SECRETS_PASSPHRASE="$passphrase"
-# dotfiles-secrets-end
+# dotfiles-coffer-start
+export COFFER_URL="$url"
+export COFFER_PASSPHRASE="$passphrase"
+# dotfiles-coffer-end
 EOF
 
     # WHY: Export for current session so setup_gpg_key can use them immediately
-    export SECRETS_URL="$url"
-    export SECRETS_PASSPHRASE="$passphrase"
+    export COFFER_URL="$url"
+    export COFFER_PASSPHRASE="$passphrase"
 
-    echo "✓ Configured secrets"
+    echo "✓ Configured coffer"
 }
 
 # Setup GPG key for commit signing
@@ -511,18 +516,18 @@ setup_gpg_key() {
         return 0
     fi
 
-    if ! command -v secrets >/dev/null 2>&1; then
-        echo "⊘ Skipping GPG key setup (secrets CLI not available)"
+    if ! command -v coffer >/dev/null 2>&1; then
+        echo "⊘ Skipping GPG key setup (coffer CLI not available)"
         return 0
     fi
 
     # Check if worker is configured
-    if [[ -z "${SECRETS_URL:-}" ]] || [[ -z "${SECRETS_PASSPHRASE:-}" ]]; then
-        echo "⊘ Skipping GPG key setup (SECRETS_URL or SECRETS_PASSPHRASE not set)"
+    if [[ -z "${COFFER_URL:-}" ]] || [[ -z "${COFFER_PASSPHRASE:-}" ]]; then
+        echo "⊘ Skipping GPG key setup (COFFER_URL or COFFER_PASSPHRASE not set)"
         return 0
     fi
 
-    if secrets pull 2>/dev/null; then
+    if coffer pull 2>/dev/null; then
         if [[ -f "$HOME/.ssh/gpg" ]]; then
             if gpg --import "$HOME/.ssh/gpg" 2>/dev/null; then
                 # Set ultimate trust for the imported key
@@ -536,7 +541,7 @@ setup_gpg_key() {
             echo "⊘ GPG key file not found at ~/.ssh/gpg"
         fi
     else
-        echo "⊘ No secrets in worker yet (use: secrets push)"
+        echo "⊘ No files in worker yet (use: coffer push)"
     fi
 }
 
@@ -601,8 +606,8 @@ main() {
     [[ "$INSTALL_GIT_CONFIG" == true ]] && configure_git
 
     if [[ "$INSTALL_SECRETS" == true ]]; then
-        configure_secrets
-        install_secrets_cli
+        configure_coffer
+        install_coffer_cli
         setup_gpg_key
     fi
 

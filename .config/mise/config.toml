@@ -6,6 +6,9 @@
 "cargo:procs" = "latest"
 "go:github.com/docker/docker-language-server/cmd/docker-language-server" = "latest"
 "go:github.com/go-delve/delve/cmd/dlv" = "latest"
+# Note: secrets CLI installed via go install in setup.sh (local source)
+# Can optionally enable this if/when published to GitHub:
+# "go:github.com/thedaneeffect/dotfiles/cmd/secrets" = "latest"
 "go:golang.org/x/tools/gopls" = "latest"
 "golangci-lint-langserver"="latest"
 "npm:bash-language-server" = "latest"
