@@ -165,6 +165,14 @@ install_and_configure_mise() {
     brew install -q mise
     echo "✓ Installed mise"
 
+    # Install gnupg before mise tools (needed for signature verification)
+    # WHY here: mise verifies tool signatures, requires GPG to exist first
+    if ! command -v gpg &> /dev/null; then
+        echo "→ Installing gnupg (required for mise signature verification)..."
+        brew install -q gnupg
+        echo "✓ Installed gnupg"
+    fi
+
     # We need these installed first before we link our config, otherwise it
     # attempts to install everything BEFORE then.
     echo "→ Installing core languages (go, rust, node, bun, zig)..."
@@ -195,9 +203,9 @@ install_homebrew_packages() {
 
     local deps=(
         gum
-        gnupg
         btop      # Not available via mise on some platforms
     )
+    # Note: gnupg is installed earlier in install_and_configure_mise()
 
     brew install -q "${deps[@]}"
     echo "✓ Installed Homebrew packages"
