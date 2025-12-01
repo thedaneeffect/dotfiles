@@ -165,20 +165,23 @@ install_and_configure_mise() {
     brew install -q mise
     echo "✓ Installed mise"
 
+    # We need these installed first before we link our config, otherwise it
+    # attempts to install everything BEFORE then.
+    echo "→ Installing core languages (go, rust, node, bun, zig)..."
+    MISE_NO_CONFIG=1 mise use -g go zig rust cargo-binstall node bun
+    echo "✓ Installed core languages"
+
     # Symlink global mise configuration
     if symlink_config "$SCRIPT_DIR/.config/mise/config.toml" "$HOME/.config/mise/config.toml"; then
         echo "✓ Symlinked mise configuration"
     fi
 
-    # Install core languages first (warnings about go: packages are expected)
-    echo "→ Installing core languages (go, rust, bun, zig)..."
-    mise use -g go zig rust cargo-binstall bun
-    echo "✓ Installed core languages"
-
     # Activate mise now that core languages are installed
-    # WHY now: Remaining mise tools may depend on go/rust/etc being available
     export PATH="$HOME/.local/bin:$PATH"
     eval "$(mise activate bash)"
+
+    # NOW trust the config - it can properly validate go:* and npm:* tools
+    mise trust "$HOME/.config/mise/config.toml"
 
     # Install all remaining mise tools
     echo "→ Installing remaining mise tools..."
@@ -563,6 +566,11 @@ main() {
         echo "✓ Symlinked tealdeer config"
     fi
 
+    # Symlink starship config
+    if symlink_config "$SCRIPT_DIR/.config/starship.toml" "$HOME/.config/starship.toml"; then
+        echo "✓ Symlinked starship config"
+    fi
+
     [[ "$INSTALL_FONTS" == true ]] && try_install_fonts
 
     if [[ "$INSTALL_TERMINAL_SETTINGS" == true ]]; then
@@ -597,8 +605,25 @@ main() {
 
     gum style --border rounded --padding "1 1" --margin "1 1" --foreground 2 "✓ Setup complete!"
 
+    # Automatically switch to zsh if we installed shell config
     if [[ "$INSTALL_SHELL_CONFIG" == true ]]; then
-        echo "Run: exec zsh   # Or log out and back in"
+        echo "→ Switching to zsh..."
+
+        # Find zsh from Homebrew installation
+        local zsh_path=""
+        if [[ -f /opt/homebrew/bin/zsh ]]; then
+            zsh_path="/opt/homebrew/bin/zsh"
+        elif [[ -f /usr/local/bin/zsh ]]; then
+            zsh_path="/usr/local/bin/zsh"
+        elif [[ -f /home/linuxbrew/.linuxbrew/bin/zsh ]]; then
+            zsh_path="/home/linuxbrew/.linuxbrew/bin/zsh"
+        fi
+
+        if [[ -n "$zsh_path" ]]; then
+            exec "$zsh_path" -l
+        else
+            echo "⊘ Could not find zsh, run manually: exec zsh"
+        fi
     fi
 }
 

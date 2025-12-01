@@ -44,6 +44,7 @@ elif [[ -f /home/linuxbrew/.linuxbrew/bin/brew ]]; then
     eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 fi
 export HOMEBREW_NO_ENV_HINTS=1
+export HOMEBREW_NO_ANALYTICS=1
 
 # ============================================================================
 # mise - unified tool version management
@@ -86,8 +87,9 @@ alias ..='cd ..'
 alias ...='cd ../..'
 
 # Modern replacements
-alias ls='eza'
-alias ll='eza -l'
+alias l='eza -l'
+alias ls='eza -l'
+alias ll='eza -ll'
 alias la='eza -la'
 alias tree='eza --tree'
 
@@ -128,3 +130,4 @@ if [[ -d "$HOME/.config/zsh.d" ]]; then
         source "$config"
     done
 fi
+
