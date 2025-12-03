@@ -105,3 +105,4 @@ This system has modern CLI tools installed. Use these non-interactive tools when
 - All listed tools can be used non-interactively in scripts and commands
 - Avoid interactive tools not listed here: helix, zellij, btop, fzf, zoxide (zi mode)
 - Tool versions and additional tools available in `.config/mise/config.toml`
+- Never co-author or add Generated with [Claude Code] to commit messages.
