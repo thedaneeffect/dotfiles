@@ -567,9 +567,18 @@ setup_gpg_key() {
         return 0
     fi
 
+    # Initialize GPG directory if it doesn't exist
+    if [[ ! -d "$HOME/.local/share/gnupg" ]]; then
+        mkdir -p "$HOME/.local/share/gnupg"
+        chmod 700 "$HOME/.local/share/gnupg"
+        # Initialize keyring by listing keys (creates pubring.kbx and trustdb.gpg)
+        gpg --list-keys >/dev/null 2>&1
+    fi
+
     if coffer pull 2>/dev/null; then
         if [[ -f "$HOME/.ssh/gpg" ]]; then
             if gpg --import "$HOME/.ssh/gpg" 2>/dev/null; then
+                echo "✓ Imported GPG key for commit signing"
                 # Set ultimate trust for the imported key
                 echo -e "5\ny\n" | gpg --command-fd 0 --expert --edit-key 7B5FC82E53B5ABE6 trust quit 2>/dev/null && \
                     echo "✓ Key trusted for signing" || \
