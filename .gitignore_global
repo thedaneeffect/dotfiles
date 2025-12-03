@@ -147,3 +147,5 @@ htmlcov/
 .grunt
 .lock-wscript
 .parcel-cache
+.claude/local.settings.json
+.claude/memory-bank

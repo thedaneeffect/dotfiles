@@ -18,7 +18,9 @@ export NPM_CONFIG_CACHE="$XDG_CACHE_HOME/npm"
 export EDITOR=hx
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/.local/share/cargo/bin:$PATH"
+export PATH="$HOME/.local/share/mise/shims:$PATH"
 export PATH="$HOME/go/bin:$PATH"
+export PATH="$HOME/.opencode/bin:$PATH"
 
 # History
 export HISTFILE=~/.zsh_history
@@ -129,4 +131,5 @@ if [[ -d "$HOME/.config/zsh.d" ]]; then
         source "$config"
     done
 fi
+
 

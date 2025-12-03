@@ -49,6 +49,10 @@ zoxide = "latest"
 cargo-binstall = "latest"
 node = "latest"
 tlrc = "latest"
+task = "latest"
+grex = "latest"
+dust = "latest"
+"go:code.gitea.io/tea" = "latest"
 
 [env]
 # Project-specific environment variables

@@ -255,7 +255,7 @@ select_components() {
         "Select components to install:"
 
     # Component mapping: parallel arrays for display prefixes and variable names
-    local component_prefixes=("Shell configuration" "Editor configs" "Fonts" "Git configuration" "Coffer management" "Terminal settings" "Claude CLI")
+    local component_prefixes=("Shell configuration" "Editor configs" "Fonts" "Git configuration" "Coffer management" "Terminal settings" "AI CLIs")
     local component_vars=(INSTALL_SHELL_CONFIG INSTALL_EDITOR_CONFIGS INSTALL_FONTS INSTALL_GIT_CONFIG INSTALL_COFFER INSTALL_TERMINAL_SETTINGS INSTALL_CLAUDE)
 
     # Initialize all to false
@@ -272,7 +272,7 @@ select_components() {
         "Git configuration (GPG signing)" \
         "Coffer management (Cloudflare Worker)" \
         "Terminal settings (iTerm2, Windows Terminal)" \
-        "Claude CLI")
+        "AI CLIs (Claude, OpenCode)")
 
     # Parse selections
     while IFS= read -r item; do
@@ -414,6 +414,20 @@ install_claude_cli() {
     echo "✓ Installed Claude CLI"
 }
 
+# Install OpenCode CLI
+install_opencode_cli() {
+    if command -v opencode >/dev/null 2>&1; then
+        return 0
+    fi
+
+    # WHY: OpenCode installer puts binary in ~/.opencode/bin, needed for detection
+    export PATH="$HOME/.opencode/bin:$PATH"
+
+    echo "→ Installing OpenCode CLI..."
+    curl -fsSL https://opencode.ai/install | bash
+    echo "✓ Installed OpenCode CLI"
+}
+
 # Configure Claude CLI custom instructions
 configure_claude_instructions() {
     if ! command -v claude >/dev/null 2>&1; then
@@ -429,6 +443,29 @@ configure_claude_instructions() {
     # Symlink settings.json
     if symlink_config "$SCRIPT_DIR/.claude/settings.json" "$HOME/.claude/settings.json"; then
         echo "✓ Symlinked Claude settings"
+    fi
+}
+
+# Configure OpenCode CLI custom agents
+configure_opencode_config() {
+    if ! command -v opencode >/dev/null 2>&1; then
+        echo "⊘ Skipping OpenCode config (OpenCode CLI not installed)"
+        return 0
+    fi
+
+    # Symlink opencode.json
+    if symlink_config "$SCRIPT_DIR/.config/opencode/opencode.json" "$HOME/.config/opencode/opencode.json"; then
+        echo "✓ Symlinked OpenCode settings"
+    fi
+
+    # Symlink AGENTS.md
+    if symlink_config "$SCRIPT_DIR/.config/opencode/AGENTS.md" "$HOME/.config/opencode/AGENTS.md"; then
+        echo "✓ Symlinked OpenCode custom instructions"
+    fi
+
+    # Symlink agent directory
+    if symlink_config "$SCRIPT_DIR/.config/opencode/agent" "$HOME/.config/opencode/agent"; then
+        echo "✓ Symlinked OpenCode agents"
     fi
 }
 
@@ -616,7 +653,9 @@ main() {
 
     if [[ "$INSTALL_CLAUDE" == true ]]; then
         install_claude_cli
+        install_opencode_cli
         configure_claude_instructions
+        configure_opencode_config
     fi
 
     gum style --border rounded --padding "1 1" --margin "1 1" --foreground 2 "✓ Setup complete!"
