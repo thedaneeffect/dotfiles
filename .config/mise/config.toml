@@ -52,7 +52,7 @@ tlrc = "latest"
 task = "latest"
 grex = "latest"
 dust = "latest"
-"go:code.gitea.io/tea" = "latest"
+"go:code.gitea.io/tea" = "HEAD"
 
 [env]
 # Project-specific environment variables
