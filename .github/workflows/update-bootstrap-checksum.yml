@@ -1,0 +1,37 @@
+name: Update Bootstrap Checksum
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'bootstrap.sh'
+
+jobs:
+  update-checksum:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Calculate SHA256 checksum
+        id: checksum
+        run: |
+          CHECKSUM=$(sha256sum bootstrap.sh | awk '{print $1}')
+          echo "checksum=$CHECKSUM" >> $GITHUB_OUTPUT
+          echo "Bootstrap checksum: $CHECKSUM"
+
+      - name: Update Cloudflare Worker KV
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          CF_NAMESPACE_ID: ${{ secrets.CF_NAMESPACE_ID }}
+          CHECKSUM: ${{ steps.checksum.outputs.checksum }}
+        run: |
+          # Update KV with new checksum
+          curl -X PUT "https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/storage/kv/namespaces/${CF_NAMESPACE_ID}/values/bootstrap:checksum" \
+            -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            -H "Content-Type: text/plain" \
+            --data "${CHECKSUM}"
+
+          echo "✓ Updated bootstrap checksum in Cloudflare KV"

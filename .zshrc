@@ -36,6 +36,20 @@ setopt SHARE_HISTORY
 setopt AUTO_PUSHD           # Automatically push directories onto stack
 setopt CDABLE_VARS          # Allow cd to variable names
 setopt PUSHD_MINUS          # Swap meaning of cd +1 and cd -1
+setopt PUSHD_IGNORE_DUPS    # Don't push duplicate directories
+setopt PUSHD_SILENT         # Don't print directory stack after pushd/popd
+
+# Persistent directory stack across sessions
+DIRSTACKFILE="$XDG_STATE_HOME/zsh/dirs"
+if [[ -f "$DIRSTACKFILE" ]] && [[ ${#dirstack[*]} -eq 0 ]]; then
+    dirstack=( ${(f)"$(< $DIRSTACKFILE)"} )
+    [[ -d "${dirstack[1]}" ]] && cd -q "${dirstack[1]}"
+fi
+chpwd() {
+    print -l $PWD ${(u)dirstack} > "$DIRSTACKFILE"
+}
+
+DIRSTACKSIZE=20
 
 # ============================================================================
 # Homebrew
