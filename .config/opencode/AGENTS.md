@@ -34,8 +34,32 @@ This system has modern CLI tools installed. Use these when executing commands:
     - `fd -e md -e ts config schema agent`
   - ✅ Correct - treats words as a regex pattern to match in filenames
     - `fd -e md -e ts '(config|schema|agent)'`
-- **ast-grep (sg)**: Structural search and replace for code
-  - Example: `sg --pattern 'console.log($$$)'`
+- **ast-grep (sg)**: Structural search and replace for code using AST patterns
+  - More precise than regex - understands code structure
+  - **Search**: `sg run -p '<pattern>' -l <lang> <path>`
+  - **Replace**: `sg run -p '<pattern>' -r '<replacement>' -l <lang> <path> -U`
+  - **Wildcards**:
+    - `$VAR` - matches single node (identifier, expression, etc.)
+    - `$$$` - matches zero or more nodes (arguments, statements, etc.)
+  - **Limitations**:
+    - **No fuzzy search** - patterns must match exactly
+    - For partial name matching, combine with `rg`: `rg -l "pattern" | xargs sg run -p '...' -l go`
+    - Function call patterns (e.g., `fmt.Println($$$)`) may not work reliably - use simpler patterns
+  - **Go Examples**:
+    - Find all functions: `sg run -p 'func $NAME($$$) $$$ { $$$ }' -l go .`
+    - Find specific function: `sg run -p 'func processUser($$$) $$$' -l go .`
+    - Find error checks: `sg run -p 'if err != nil { $$$ }' -l go .`
+    - Find assignments: `sg run -p '$VAR := $$$' -l go .`
+    - Rename function: `sg run -p 'oldName' -r 'newName' -l go . -U`
+    - Delete function: `sg run -p 'func helper() { $$$ }' -r '' -l go . -U`
+    - Delete statement: `sg run -p 'y := 2' -r '' -l go . -U`
+    - Find return statements: `sg run -p 'return $$$' -l go .`
+  - **TypeScript Examples**:
+    - Find console.log: `sg run -p 'console.log($$$)' -l ts .`
+    - Find function declarations: `sg run -p 'function $NAME($$$) { $$$ }' -l ts .`
+    - Delete function: `sg run -p 'function oldFunc($$$) { $$$ }' -r '' -l ts . -U`
+    - Remove debugger: `sg run -p 'debugger' -r '' -l ts . -U`
+  - **Use for**: refactoring, finding patterns, mass renames, code cleanup, deletions
 
 - **fd**: Use instead of find - faster, simpler syntax
   - Example: `fd pattern` or `fd '\.js$'`
@@ -63,7 +87,26 @@ This system has modern CLI tools installed. Use these when executing commands:
   - Example: `sd 'old' 'new' file.txt`
 
 - **grex**: Generate regex patterns from test cases
-  - Example: `grex 'foo123' 'bar456'` generates matching pattern
+  - Generates regex by analyzing example strings you provide
+  - **Basic usage**: `grex 'example1' 'example2' 'example3'`
+  - **Common flags**:
+    - `-d` - Replace digits with `\d` (cleaner patterns)
+    - `-x` - Generate readable multi-line regex
+    - `-f <path>` - Read examples from file (one per line)
+    - `-r` - Detect repeating patterns and use `{min,max}` quantifiers
+  - **Note**: grex generates **exact** patterns, not general ones (e.g., `\d\d` not `\d+`)
+    - The pattern matches only the digit lengths in your examples
+    - The `-r` flag uses `{min,max}` quantifiers (e.g., `\d{1,3}`) but never generates `+` or `*`
+    - For general patterns like `\d+`, manually edit the output or provide more varied examples
+  - **Examples**:
+    - Semantic versions: `grex -d 'go1.22.3' 'go1.23' 'go1.23.4' 'go1.22' 'go1.21.12'` → `^go\d\.\d\d(?:\.\d(?:\d)?)?$`
+    - With repetitions: `grex -d -r 'v1.2.3' 'v1.2' 'v2.0.0' 'v2.0'` → `^v(?:\d(?:\.\d|(?:\.\d){2})|(?:\d\.\d){2})$`
+    - Date formats: `grex -d '2025-01-15' '2024-12-31'` → `^\d\d\d\d-\d\d-\d\d$`
+    - Package versions: `grex -d 'node@20.5.1' 'node@20' 'node@18.19.0' 'bun@1.3.3'`
+    - Branch names: `grex 'feature/add-auth' 'feature/fix-bug' 'bugfix/issue-123'`
+    - Log levels: `grex 'ERROR:' 'WARN:' 'INFO:' 'DEBUG:'`
+  - **Use with grep**: `PATTERN=$(grex -d 'go1.2' 'go1.23'); grep -E "$PATTERN" file.txt`
+  - **Use for**: Validating input formats, extracting patterns, filtering logs
 
 ## Package & Version Management
 
@@ -74,6 +117,22 @@ This system has modern CLI tools installed. Use these when executing commands:
   - Example: `mise use go@1.23` to switch versions
   - Example: `mise run <task>` to run tasks
   - All tool versions and tasks defined in `.mise.toml`
+  - **IMPORTANT FOR LLMs**: When installing tools that need to be used immediately in the same session, use `llm-install-tool`:
+    - **Pattern**: `llm-install-tool <tool> > /tmp/i.sh && source /tmp/i.sh`
+    - Example: `llm-install-tool ripgrep > /tmp/i.sh && source /tmp/i.sh` - installs and makes tool immediately available
+    - Example: `llm-install-tool node@20 > /tmp/i.sh && source /tmp/i.sh` - installs specific version  
+    - Example: `llm-install-tool npm:typescript > /tmp/i.sh && source /tmp/i.sh` - installs npm packages
+    - **Multi-line scripts**: Wrap your entire script in a bash heredoc to use the tool multiple times after installing:
+      ```bash
+      bash << 'EOF'
+      llm-install-tool jless > /tmp/i.sh && source /tmp/i.sh
+      echo '{"data": "value"}' | jless --mode line
+      # Tool is available for rest of script
+      EOF
+      ```
+    - **Must redirect to temp file then source** for the tool to be available in the current shell
+    - Tool is available for the duration of that bash session only
+    - Use regular `mise install` only if you don't need the tool in the current session
 
 - **bun**: Fast JavaScript runtime and package manager
   - Modern alternative to npm/yarn/node
@@ -198,3 +257,34 @@ To create: Add to `.mise.toml` under `[tasks]` section, then use `mise run <task
 - Git shortcuts are available and preferred
 - Prefer mise over manual tool installation
 
+## Tool Calling
+
+- ALWAYS USE PARALLEL TOOLS WHEN APPLICABLE. Here is an example illustrating how to execute 3 parallel file reads in this chat environment:
+
+```json
+{
+"recipient_name": "multi_tool_use.parallel",
+"parameters": {
+"tool_uses": [
+{
+"recipient_name": "functions.read",
+"parameters": {
+"filePath": "path/to/file.tsx"
+}
+},
+{
+"recipient_name": "functions.read",
+"parameters": {
+"filePath": "path/to/file.ts"
+}
+},
+{
+"recipient_name": "functions.read",
+"parameters": {
+"filePath": "path/to/file.md"
+}
+}
+]
+}
+}
+```
