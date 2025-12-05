@@ -21,6 +21,8 @@ export PATH="$HOME/.local/share/cargo/bin:$PATH"
 export PATH="$HOME/.local/share/mise/shims:$PATH"
 export PATH="$HOME/go/bin:$PATH"
 export PATH="$HOME/.opencode/bin:$PATH"
+export OPENCODE_DISABLE_AUTOUPDATE=true
+export OPENCODE_DISABLE_AUTOCOMPACT=true
 
 # History
 export HISTFILE=~/.zsh_history
@@ -93,6 +95,7 @@ eval "$(starship init zsh)"
 eval "$(fzf --zsh)"
 eval "$(zoxide init zsh)"
 eval "$(mise completion zsh)"
+eval "$(golangci-lint completion zsh)"
 
 # ============================================================================
 # Aliases
@@ -116,7 +119,7 @@ alias gc='git commit'
 alias gd='git diff'
 alias gds='git diff --staged'
 alias gl='git log'
-alias gcob='git branch | fzf | xargs git checkout'
+alias gcob='git for-each-ref --format="%(refname:lstrip=2)" refs/heads/ refs/remotes/ | sed "s#^origin/##" | sort -u | fzf | xargs git switch'
 alias glf='git log --oneline | fzf --preview "git show {1}"'
 alias gp='git push'
 
@@ -127,6 +130,7 @@ alias miu='mise upgrade'
 alias mis='mise use'
 alias mil='mise list'
 alias mio='mise outdated'
+alias mt='mise task'
 
 # Utilities
 alias grep='grep --color=auto'
@@ -146,4 +150,6 @@ if [[ -d "$HOME/.config/zsh.d" ]]; then
     done
 fi
 
+# bun completions
+[ -s "/Users/dane/.bun/_bun" ] && source "/Users/dane/.bun/_bun"
 

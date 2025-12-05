@@ -27,7 +27,7 @@ fd = "latest"
 fzf = "latest"
 gh = "latest"
 glow = "latest"
-go = "latest"
+go = "1.25.4"
 gofumpt = "latest"
 golangci-lint = "latest"
 golines = "latest"
@@ -60,12 +60,6 @@ dust = "latest"
 # (General shell env like XDG is in .zshrc)
 GOPATH = "{{ env.HOME }}/go"
 GO111MODULE = "on"
-
-# Tasks - run with: mise run <task>
-# Global tasks (available from anywhere after setup)
-[tasks.bootstrap]
-description = "Re-run bootstrap script from secrets server"
-run = "bash <(curl -fsSL https://secrets.medieval.software/bootstrap)"
 
 [settings]
 # Automatically install tools when entering directory
