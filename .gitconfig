@@ -61,3 +61,6 @@
 	branches = branch -a
 	remotes = remote -v
 	contributors = shortlog -sn
+[rebase]
+	autosquash = true
+	updateRefs = true
