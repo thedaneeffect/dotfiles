@@ -53,6 +53,7 @@ task = "latest"
 grex = "latest"
 dust = "latest"
 "go:code.gitea.io/tea" = "HEAD"
+"cargo:git-absorb" = "latest"
 
 [env]
 # Project-specific environment variables
