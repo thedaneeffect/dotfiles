@@ -106,3 +106,5 @@ This system has modern CLI tools installed. Use these non-interactive tools when
 - Avoid interactive tools not listed here: helix, zellij, btop, fzf, zoxide (zi mode)
 - Tool versions and additional tools available in `.config/mise/config.toml`
 - Never co-author or add Generated with [Claude Code] to commit messages.
+- Before committing, ensure that you are aware of what the diff actually is, so that you can be well informed when writing the message.
+- Before creating a PR, ensure that you are aware of all the commits and what their diffs are.
