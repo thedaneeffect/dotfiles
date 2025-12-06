@@ -25,7 +25,9 @@ export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/.local/share/cargo/bin:$PATH"
 export PATH="$HOME/.local/share/mise/shims:$PATH"
 export PATH="$HOME/go/bin:$PATH"
-export PATH="$HOME/.opencode/bin:$PATH"
+
+# opencode
+export PATH="$XDG_DATA_HOME/opencode/bin:$PATH"
 export OPENCODE_DISABLE_AUTOUPDATE=true
 export OPENCODE_DISABLE_AUTOCOMPACT=true
 export UV_MANAGED_PYTHON=1
@@ -157,3 +159,4 @@ if [[ -d "$HOME/.config/zsh.d" ]]; then
         source "$config"
     done
 fi
+
