@@ -143,7 +143,7 @@ alias mio='mise outdated'
 alias mt='mise task'
 
 # AI CLIs
-alias pup='uvx --from code-puppy pup'
+alias pup='uvx --from /tmp/code_puppy pup'
 
 # Utilities
 alias grep='grep --color=auto'
