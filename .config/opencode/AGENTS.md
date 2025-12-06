@@ -257,6 +257,41 @@ To create: Add to `.mise.toml` under `[tasks]` section, then use `mise run <task
 - Git shortcuts are available and preferred
 - Prefer mise over manual tool installation
 
+## Shell Best Practices
+
+**Heredocs for Multi-line Strings:**
+- When passing multi-line text (especially markdown) to commands, use heredocs to avoid escaping issues
+- Prevents problems with backticks, quotes, and special characters
+
+**Examples:**
+
+Good (using heredoc):
+```bash
+gh pr comment 127 --body "$(cat <<'EOF'
+## Title
+Some `code` with backticks
+And "quotes" work fine
+EOF
+)"
+```
+
+Bad (manual escaping):
+```bash
+gh pr comment 127 --body "## Title\nSome \`code\` with backticks\nAnd \"quotes\" work fine"
+```
+
+**Heredoc variants:**
+- `<< EOF` - Variables expand (`$VAR` becomes value)
+- `<< 'EOF'` - No expansion (literal `$VAR`)
+- `<<- EOF` - Allows leading tabs (for indented code)
+
+**When to use heredocs:**
+- Multi-line markdown (PR descriptions, comments, issues)
+- Creating config files
+- Complex strings with special characters
+- Multi-line SQL/queries
+- Any text where you'd need to escape backticks or quotes
+
 ## Tool Calling
 
 - ALWAYS USE PARALLEL TOOLS WHEN APPLICABLE. Here is an example illustrating how to execute 3 parallel file reads in this chat environment:

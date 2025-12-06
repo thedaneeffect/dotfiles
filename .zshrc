@@ -11,6 +11,11 @@ export CARGO_HOME="$XDG_DATA_HOME/cargo"
 export GNUPGHOME="$XDG_DATA_HOME/gnupg"
 export LESSHISTFILE="$XDG_STATE_HOME/less/history"
 export NPM_CONFIG_CACHE="$XDG_CACHE_HOME/npm"
+export DOCKER_CONFIG="$XDG_CONFIG_HOME/docker"
+export GRADLE_USER_HOME="$XDG_DATA_HOME/gradle"
+export RUSTUP_HOME="$XDG_DATA_HOME/rustup"
+export SDKMAN_DIR="$XDG_DATA_HOME/sdkman"
+export USQL_HISTORY="$XDG_STATE_HOME/usql/history"
 
 # ============================================================================
 # Environment
@@ -23,6 +28,7 @@ export PATH="$HOME/go/bin:$PATH"
 export PATH="$HOME/.opencode/bin:$PATH"
 export OPENCODE_DISABLE_AUTOUPDATE=true
 export OPENCODE_DISABLE_AUTOCOMPACT=true
+export UV_MANAGED_PYTHON=1
 
 # History
 export HISTFILE=~/.zsh_history
@@ -72,15 +78,16 @@ eval "$(mise activate zsh 2>/dev/null)"
 # ============================================================================
 # Bun
 # ============================================================================
-export BUN_INSTALL="$HOME/.bun"
+export BUN_INSTALL="$XDG_DATA_HOME/bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 [ -s "$BUN_INSTALL/_bun" ] && source "$BUN_INSTALL/_bun"
 
 # ============================================================================
 # Completion & Interactive Features
 # ============================================================================
+export ZSH_COMPDUMP="$XDG_CACHE_HOME/zsh/zcompdump"
 autoload -Uz compinit
-compinit
+compinit -d "$ZSH_COMPDUMP"
 
 zstyle ':completion:*:directory-stack' list-colors '=(#b) #([0-9]#)*( *)==95=38;5;12'
 
@@ -104,6 +111,7 @@ eval "$(golangci-lint completion zsh)"
 # Navigation
 alias ..='cd ..'
 alias ...='cd ../..'
+alias .rc='. ~/.zshrc'
 
 # Modern replacements
 alias l='eza -la'
@@ -149,7 +157,3 @@ if [[ -d "$HOME/.config/zsh.d" ]]; then
         source "$config"
     done
 fi
-
-# bun completions
-[ -s "/Users/dane/.bun/_bun" ] && source "/Users/dane/.bun/_bun"
-
