@@ -142,6 +142,9 @@ alias mil='mise list'
 alias mio='mise outdated'
 alias mt='mise task'
 
+# AI CLIs
+alias pup='uvx --from code-puppy pup'
+
 # Utilities
 alias grep='grep --color=auto'
 alias rc='$EDITOR ~/.$(basename $SHELL)rc'
