@@ -3,6 +3,11 @@
 
 set -euo pipefail
 
+# Environment variables:
+#   DEBUG=1         - Enable shell debugging (set -x)
+#   NO_BACKUP=1     - Skip creating .bak backups of existing files
+#   ALLOW_ROOT=1    - Allow running as root (not recommended)
+
 # Uncomment for debugging: set -x
 # Or run with: DEBUG=1 ./setup.sh
 [[ "${DEBUG:-}" == "1" ]] && set -x
@@ -31,8 +36,12 @@ RC_FILE="$HOME/.zshrc"
 
 # Helper: Create .bak backup of a file (only if backup doesn't already exist)
 # WHY: Preserve the first backup if script is run multiple times
+# Set NO_BACKUP=1 to skip creating backups
 backup_file() {
     local file="$1"
+    if [[ "${NO_BACKUP:-}" == "1" ]]; then
+        return 0
+    fi
     if [[ -f "$file" ]] && [[ ! -f "$file.bak" ]]; then
         cp "$file" "$file.bak"
     fi
