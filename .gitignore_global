@@ -88,6 +88,9 @@ yarn-error.log*
 logs/
 *.log.*
 
+# Python
+.ruff_cache/
+
 # Environment and secrets
 .env
 .env.local
