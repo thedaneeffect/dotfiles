@@ -54,6 +54,8 @@ grex = "latest"
 dust = "latest"
 "go:code.gitea.io/tea" = "HEAD"
 "cargo:git-absorb" = "latest"
+"npm:svelte-language-server" = "latest"
+ffmpeg = "latest"
 
 [env]
 # Project-specific environment variables

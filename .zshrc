@@ -142,10 +142,6 @@ alias mil='mise list'
 alias mio='mise outdated'
 alias mt='mise task'
 
-# AI CLIs
-alias pup='ANTHROPIC_API_KEY=$(jq -r ".anthropic.access // empty" ~/.local/share/opencode/auth.json 2>/dev/null) uvx --from /tmp/code_puppy pup'
-alias pup-update='(cd /tmp/code_puppy && git fetch upstream && git rebase upstream/main && git push origin feat/xdg-support --force-with-lease) && echo "✅ Updated pup fork"'
-
 # Utilities
 alias grep='grep --color=auto'
 alias rc='$EDITOR ~/.$(basename $SHELL)rc'
