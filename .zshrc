@@ -160,3 +160,5 @@ if [[ -d "$HOME/.config/zsh.d" ]]; then
     done
 fi
 
+
+. "$HOME/.local/share/../bin/env"

@@ -321,11 +321,7 @@ try_install_fonts() {
         return 0
     fi
 
-    if is_wsl; then
-        # WSL: Use PowerShell script to install fonts in Windows
-        powershell.exe -ExecutionPolicy Bypass -File "$(wslpath -w "$SCRIPT_DIR/scripts/install_fonts.ps1")" 2>/dev/null
-        echo "✓ Installed fonts (WSL)"
-    elif is_macos; then
+    if is_macos; then
         # macOS: Copy fonts to user fonts directory
         local user_fonts="$HOME/Library/Fonts"
         mkdir -p "$user_fonts"

@@ -30,3 +30,6 @@ newline="¬"
 [editor.indent-guides]
 render=true
 character='┆'
+
+[editor.soft-wrap]
+enable = true

@@ -1,16 +1,26 @@
 {
-  "tui": {
-    "padding": {
-      "horizontal": 0,
-      "vertical": 0,
-    }
-  },
   "permission": {
     "edit": "allow",
     "bash": "allow",
     "webfetch": "allow",
     "doom_loop": "deny",
     "external_directory": "allow"
+  },
+  "mcp": {
+    "playwright": {
+      "type": "local",
+      "command": [
+        "npx",
+        "@playwright/mcp@latest",
+        "--browser",
+        "firefox",
+        "--caps=vision",
+        "--console-level=debug",
+        "--output-dir",
+        "/tmp/playwright/"
+      ],
+      "enabled": true
+    }
   },
   "$schema": "https://opencode.ai/config.json"
 }

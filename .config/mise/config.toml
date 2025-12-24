@@ -56,6 +56,8 @@ dust = "latest"
 "cargo:git-absorb" = "latest"
 "npm:svelte-language-server" = "latest"
 ffmpeg = "latest"
+opencode = "latest"
+rclone = "latest"
 
 [env]
 # Project-specific environment variables
