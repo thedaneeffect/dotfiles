@@ -28,8 +28,8 @@ export PATH="$HOME/go/bin:$PATH"
 
 # opencode
 export PATH="$XDG_DATA_HOME/opencode/bin:$PATH"
-export OPENCODE_DISABLE_AUTOUPDATE=true
-export OPENCODE_DISABLE_AUTOCOMPACT=true
+# export OPENCODE_DISABLE_AUTOUPDATE=true
+# export OPENCODE_DISABLE_AUTOCOMPACT=true
 export UV_MANAGED_PYTHON=1
 
 # History
