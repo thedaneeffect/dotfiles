@@ -235,7 +235,7 @@ cleanup_homebrew_tools() {
 
     # List of packages to uninstall (migrated to mise)
     # Keep in Homebrew: btop, dust, grex, tokei, tealdeer/tldr, gum
-    local migrated=(yq helix go rust fzf zoxide ripgrep bat eza ast-grep fd direnv git-delta jq sd glow gh golangci-lint zig zls taplo goenv starship marksman zellij go-task procs)
+    local migrated=(yq helix go rust fzf zoxide ripgrep bat eza ast-grep fd direnv git-delta jq sd glow gh golangci-lint zig zls taplo goenv starship marksman go-task procs)
 
     # WHY || true: Some packages may not be installed, that's fine
     brew uninstall -q "${migrated[@]}" 2>/dev/null || true
@@ -651,10 +651,6 @@ main() {
             echo "✓ Symlinked Helix config"
         fi
 
-        # Symlink Zellij config
-        if symlink_config "$SCRIPT_DIR/.config/zellij/config.kdl" "$HOME/.config/zellij/config.kdl"; then
-            echo "✓ Symlinked Zellij config"
-        fi
     fi
 
     [[ "$INSTALL_GIT_CONFIG" == true ]] && configure_git
