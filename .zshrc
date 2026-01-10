@@ -149,6 +149,9 @@ alias myip='curl -s ifconfig.me'
 alias ports='lsof -i -P -n | grep LISTEN'
 alias bootstrap='bash <(curl -fsSL https://coffer.medieval.software/bootstrap) && source ~/.zshrc'
 
+# Life on the edge baby
+alias claude='claude --dangerously-skip-permissions'
+
 # ============================================================================
 # System-specific overrides
 # ============================================================================
@@ -162,3 +165,6 @@ fi
 
 
 . "$HOME/.local/share/../bin/env"
+
+# bun completions
+[ -s "~/.local/share/bun/_bun" ] && source "~/.local/share/bun/_bun"
