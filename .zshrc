@@ -12,10 +12,7 @@ export GNUPGHOME="$XDG_DATA_HOME/gnupg"
 export LESSHISTFILE="$XDG_STATE_HOME/less/history"
 export NPM_CONFIG_CACHE="$XDG_CACHE_HOME/npm"
 export DOCKER_CONFIG="$XDG_CONFIG_HOME/docker"
-export GRADLE_USER_HOME="$XDG_DATA_HOME/gradle"
 export RUSTUP_HOME="$XDG_DATA_HOME/rustup"
-export SDKMAN_DIR="$XDG_DATA_HOME/sdkman"
-export USQL_HISTORY="$XDG_STATE_HOME/usql/history"
 
 # ============================================================================
 # Environment
@@ -26,11 +23,6 @@ export PATH="$HOME/.local/share/cargo/bin:$PATH"
 export PATH="$HOME/.local/share/mise/shims:$PATH"
 export PATH="$HOME/go/bin:$PATH"
 
-# opencode
-export PATH="$XDG_DATA_HOME/opencode/bin:$PATH"
-# export OPENCODE_DISABLE_AUTOUPDATE=true
-# export OPENCODE_DISABLE_AUTOCOMPACT=true
-export UV_MANAGED_PYTHON=1
 
 # History
 export HISTFILE=~/.zsh_history
@@ -152,6 +144,8 @@ alias bootstrap='bash <(curl -fsSL https://coffer.medieval.software/bootstrap) &
 # Life on the edge baby
 alias claude='claude --dangerously-skip-permissions'
 
+resize() { magick "$1" -trim +repage -filter Lanczos -resize "$2" -background none -gravity center -extent "$2" "$3"; }
+
 # ============================================================================
 # System-specific overrides
 # ============================================================================
@@ -164,7 +158,3 @@ if [[ -d "$HOME/.config/zsh.d" ]]; then
 fi
 
 
-. "$HOME/.local/share/../bin/env"
-
-# bun completions
-[ -s "~/.local/share/bun/_bun" ] && source "~/.local/share/bun/_bun"
