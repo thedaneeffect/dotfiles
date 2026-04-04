@@ -616,9 +616,32 @@ configure_git() {
     echo "✓ Configured git"
 }
 
+# Ensure Linux system packages are up to date and required libraries are installed
+prepare_linux() {
+    if [[ "$(uname)" != "Linux" ]]; then
+        return 0
+    fi
+
+    if ! command -v apt >/dev/null 2>&1; then
+        return 0
+    fi
+
+    echo "→ Updating system packages..."
+    sudo apt update -qq && sudo apt upgrade -y -qq
+    echo "✓ System packages updated"
+
+    # WHY: Node.js (via mise) requires libatomic1 on Ubuntu 24.04+, not installed by default
+    if ! dpkg -s libatomic1 >/dev/null 2>&1; then
+        echo "→ Installing libatomic1 (required by Node.js)..."
+        sudo apt install -y -qq libatomic1
+        echo "✓ Installed libatomic1"
+    fi
+}
+
 # Main execution
 main() {
     # Install core dependencies in correct order
+    prepare_linux
     install_homebrew
     install_and_configure_mise
     install_homebrew_packages
