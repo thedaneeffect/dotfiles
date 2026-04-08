@@ -55,6 +55,7 @@ ffmpeg = "latest"
 flatc = "25.1.21"
 python = "latest"
 wrangler = "latest"
+glow = "latest"
 
 [env]
 # Project-specific environment variables
