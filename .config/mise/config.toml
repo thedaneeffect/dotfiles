@@ -41,7 +41,7 @@ taplo = "latest"
 yq = "latest"
 zellij = "latest"
 zig = "latest"
-zls = "latest"
+zls = "0.16.0"
 zoxide = "latest"
 cargo-binstall = "latest"
 node = "latest"
@@ -56,6 +56,8 @@ flatc = "25.1.21"
 python = "latest"
 wrangler = "latest"
 glow = "latest"
+watchexec = "latest"
+aqua = "2.57.2"
 
 [env]
 # Project-specific environment variables

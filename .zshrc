@@ -22,6 +22,7 @@ export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/.local/share/cargo/bin:$PATH"
 export PATH="$HOME/.local/share/mise/shims:$PATH"
 export PATH="$HOME/go/bin:$PATH"
+export MISE_EXPERIMENTAL=1
 
 
 # History
@@ -98,6 +99,9 @@ eval "$(zoxide init zsh)"
 eval "$(mise completion zsh)"
 eval "$(golangci-lint completion zsh)"
 
+# fzf-tab: render zsh completions through fzf (must load AFTER compinit)
+source ~/.fzf-tab/fzf-tab.plugin.zsh
+
 # ============================================================================
 # Aliases
 # ============================================================================
@@ -145,6 +149,17 @@ alias bootstrap='bash <(curl -fsSL https://coffer.medieval.software/bootstrap) &
 alias claude='claude --dangerously-skip-permissions'
 
 resize() { magick "$1" -trim +repage -filter Lanczos -resize "$2" -background none -gravity center -extent "$2" "$3"; }
+blender() {
+    docker run --rm \
+        --user "$(id -u):$(id -g)" \
+        --entrypoint /home/headless/blender/blender \
+        -v /mnt/c:/mnt/c \
+        -v "$HOME":"$HOME" \
+        -v "$PWD":"$PWD" \
+        -w "$PWD" \
+        blenderkit/headless-blender:blender-5.1 \
+        "$@"
+}
 
 # ============================================================================
 # System-specific overrides
