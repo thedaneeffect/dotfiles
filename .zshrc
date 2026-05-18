@@ -104,7 +104,6 @@ source ~/.fzf-tab/fzf-tab.plugin.zsh
 zstyle ':completion:*' menu no
 zstyle ':fzf-tab:*' fzf-flags --height=40% --reverse
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always $realpath'
-zstyle ':fzf-tab:complete:*:*' fzf-preview 'less ${(Q)realpath} 2>/dev/null'
 
 # ============================================================================
 # Aliases
