@@ -58,6 +58,7 @@ wrangler = "latest"
 glow = "latest"
 watchexec = "latest"
 aqua = "2.57.2"
+java = "temurin-8.0.492+9"
 
 [env]
 # Project-specific environment variables

@@ -24,6 +24,19 @@ export PATH="$HOME/.local/share/mise/shims:$PATH"
 export PATH="$HOME/go/bin:$PATH"
 export MISE_EXPERIMENTAL=1
 
+# ============================================================================
+# Agent / non-interactive shell detection
+# ============================================================================
+# Claude Code (CLAUDECODE=1) and similar agents snapshot this rc file and run
+# commands non-interactively, capturing aliases/functions. Shadowing coreutils
+# (ls->eza) or auto-cd'ing on startup then corrupts the agent's expected I/O:
+# `ls -t` errors, output shape changes, and the cwd shifts under it. Gate those
+# behaviors to real interactive human sessions only. Env/PATH above this line
+# must stay unguarded so the agent still inherits tools.
+if [[ -n "$CLAUDECODE" || ! -o interactive ]]; then
+    AGENT_SHELL=1
+fi
+
 
 # History
 export HISTFILE=~/.zsh_history
@@ -42,13 +55,17 @@ setopt PUSHD_SILENT         # Don't print directory stack after pushd/popd
 
 # Persistent directory stack across sessions
 DIRSTACKFILE="$XDG_STATE_HOME/zsh/dirs"
-if [[ -f "$DIRSTACKFILE" ]] && [[ ${#dirstack[*]} -eq 0 ]]; then
-    dirstack=( ${(f)"$(< $DIRSTACKFILE)"} )
-    [[ -d "${dirstack[1]}" ]] && cd -q "${dirstack[1]}"
+# Interactive-only: don't teleport the agent to a stale dir on startup, and
+# don't let agent `cd`s overwrite the human session's saved dirstack.
+if [[ -z "$AGENT_SHELL" ]]; then
+    if [[ -f "$DIRSTACKFILE" ]] && [[ ${#dirstack[*]} -eq 0 ]]; then
+        dirstack=( ${(f)"$(< $DIRSTACKFILE)"} )
+        [[ -d "${dirstack[1]}" ]] && cd -q "${dirstack[1]}"
+    fi
+    chpwd() {
+        print -l $PWD ${(u)dirstack} > "$DIRSTACKFILE"
+    }
 fi
-chpwd() {
-    print -l $PWD ${(u)dirstack} > "$DIRSTACKFILE"
-}
 
 DIRSTACKSIZE=20
 
@@ -114,12 +131,17 @@ alias ..='cd ..'
 alias ...='cd ../..'
 alias .rc='. ~/.zshrc'
 
-# Modern replacements
-alias l='eza -la'
-alias ls='eza -la'
-alias ll='eza -la'
-alias la='eza -la'
-alias tree='eza --tree'
+# Modern replacements — interactive only. In agent shells, leave `ls`/`tree` as
+# coreutils so flags (`ls -t`, `-1`, `--format`) and output shape stay
+# predictable for parsing. Claude is told to call `eza`/`tree` by name when it
+# wants them, so it loses nothing here.
+if [[ -z "$AGENT_SHELL" ]]; then
+    alias l='eza -la'
+    alias ls='eza -la'
+    alias ll='eza -la'
+    alias la='eza -la'
+    alias tree='eza --tree'
+fi
 
 # Git shortcuts
 alias gst='git status'
@@ -150,6 +172,9 @@ alias bootstrap='bash <(curl -fsSL https://coffer.medieval.software/bootstrap) &
 
 # Life on the edge baby
 alias claude='claude --dangerously-skip-permissions'
+
+# GPU whisper (RTX 5070 Ti / cu128 venv) — replaces removed brew CPU whisper
+alias whisper='$HOME/venvs/whisper-gpu/bin/whisper --device cuda'
 
 resize() { magick "$1" -trim +repage -filter Lanczos -resize "$2" -background none -gravity center -extent "$2" "$3"; }
 blender() {
