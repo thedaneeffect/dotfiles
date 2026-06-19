@@ -470,9 +470,34 @@ configure_claude_instructions() {
         echo "✓ Symlinked Claude custom instructions"
     fi
 
-    # Symlink settings.json
-    if symlink_config "$SCRIPT_DIR/.claude/settings.json" "$HOME/.claude/settings.json"; then
-        echo "✓ Symlinked Claude settings"
+    # Merge (don't symlink) settings.json — see merge_claude_settings for why.
+    merge_claude_settings
+}
+
+# Merge the dotfiles Claude settings patch into the live ~/.claude/settings.json.
+# WHY merge, not symlink: Claude Code rewrites settings.json at runtime (plugins,
+# permissions) via atomic write, which replaces a symlink with a standalone file and
+# silently diverges it from the repo. Merging our managed keys (hooks, prefs) preserves
+# machine-local keys AND survives Claude's writes. Mirrors try_restore_winterm's yq merge.
+# Contract: object values deep-merge; arrays (e.g. hooks.PreToolUse) are REPLACED by the
+# patch — so keep ALL dotfiles-synced hooks in settings.patch.json, not in the live file.
+merge_claude_settings() {
+    local patch="$SCRIPT_DIR/.claude/settings.patch.json"
+    local target="$HOME/.claude/settings.json"
+
+    [[ -f "$patch" ]] || return 0
+    mkdir -p "$(dirname "$target")"
+    [[ -f "$target" ]] || echo '{}' > "$target"
+    backup_file "$target"
+
+    local tmp
+    tmp=$(mktemp)
+    if jq -s '.[0] * .[1]' "$target" "$patch" > "$tmp" 2>/dev/null && [[ -s "$tmp" ]]; then
+        mv "$tmp" "$target"
+        echo "✓ Merged Claude settings patch"
+    else
+        rm -f "$tmp"
+        echo "✗ Failed to merge Claude settings patch (left existing file untouched)"
     fi
 }
 
