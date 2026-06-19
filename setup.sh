@@ -312,6 +312,31 @@ get_localappdata() {
     wslpath "$(cmd.exe /c 'echo %LOCALAPPDATA%' 2>/dev/null | tr -d '\r')"
 }
 
+# Selectively sync ~/.config/zsh.d/ snippets that live in the repo.
+# WHY: zsh.d is otherwise local-only (it holds machine secrets like coffer.zsh /
+# imagine.zsh that must NEVER be committed). This is an explicit allowlist — only the
+# files listed here get symlinked in from the repo; everything else stays local.
+# To start syncing a snippet: commit it under .config/zsh.d/ and add a line below.
+# Format: "repo-relative-path:guard"  guard = all | wsl | macos
+link_zsh_d_snippets() {
+    local entries=(
+        ".config/zsh.d/edge-debug.zsh:wsl"   # host-Edge CDP launcher (Playwright MCP)
+    )
+    local entry src guard
+    for entry in "${entries[@]}"; do
+        src="${entry%%:*}"
+        guard="${entry##*:}"
+        case "$guard" in
+            wsl)   is_wsl   || continue ;;
+            macos) is_macos || continue ;;
+        esac
+        [[ -f "$SCRIPT_DIR/$src" ]] || continue
+        if symlink_config "$SCRIPT_DIR/$src" "$HOME/$src"; then
+            echo "✓ Symlinked $src"
+        fi
+    done
+}
+
 # Install fonts from fonts/ directory
 try_install_fonts() {
     local fonts_dir="$SCRIPT_DIR/fonts"
@@ -648,6 +673,9 @@ main() {
     cleanup_homebrew_tools
 
     configure_zsh
+
+    # Symlink explicitly-allowlisted zsh.d snippets from the repo (platform-guarded).
+    link_zsh_d_snippets
 
     select_components
 

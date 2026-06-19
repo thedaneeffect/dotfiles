@@ -1,5 +1,8 @@
-# System-specific configuration (not tracked)
-.config/zsh.d/
+# System-specific configuration — secrets/machine-local snippets are NOT tracked.
+# Ignore everything in zsh.d, then explicitly allowlist snippets that should sync.
+# To sync a new snippet: add a `!` line here AND a link_zsh_d_snippets entry in setup.sh.
+.config/zsh.d/*
+!.config/zsh.d/edge-debug.zsh
 
 # Claude Code local settings
 .claude/settings.local.json

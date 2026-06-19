@@ -1,3 +1,16 @@
 {
-  "alwaysThinkingEnabled": true
+  "alwaysThinkingEnabled": true,
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "mcp__playwright__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "zsh -c 'source ~/.config/zsh.d/edge-debug.zsh 2>/dev/null; edge-debug-ensure 2>/dev/null; true'"
+          }
+        ]
+      }
+    ]
+  }
 }
