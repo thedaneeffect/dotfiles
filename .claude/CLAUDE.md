@@ -73,7 +73,7 @@
 - Be concise. Describe what changed and why when it is not obvious; do not narrate implementation details.
 - Do not add `Co-Authored-By` trailers or AI-attribution text unless the user explicitly requests it.
 
-## Remote sessions — reaching Dane's Windows/WSL2 machine
+## Remote sessions — reaching the Windows/WSL2 machine
 
 Detect remote: if `$SSH_CONNECTION` (or `$SSH_TTY`) is set, this session is being
 driven over SSH from Dane's Windows box (host DESKTOP-DANE, user dane, WSL2).
