@@ -23,6 +23,7 @@ export PATH="$HOME/.local/share/cargo/bin:$PATH"
 export PATH="$HOME/.local/share/mise/shims:$PATH"
 export PATH="$HOME/go/bin:$PATH"
 export MISE_EXPERIMENTAL=1
+export GPG_TTY=$(tty)
 
 # ============================================================================
 # Agent / non-interactive shell detection
@@ -171,7 +172,19 @@ alias ports='lsof -i -P -n | grep LISTEN'
 alias bootstrap='bash <(curl -fsSL https://coffer.medieval.software/bootstrap) && source ~/.zshrc'
 
 # Life on the edge baby
-alias claude='claude --dangerously-skip-permissions'
+# The function swaps the iTerm profile for the duration of the session and restores
+# it on exit. Gated on $ITERM_PROFILE: this rc file is shared with WSL2, where the
+# escape codes would just be inert noise written to Windows Terminal.
+if [[ -n "$ITERM_PROFILE" ]]; then
+  claude() {
+    local prev_profile="$ITERM_PROFILE"
+    echo -ne "\033]1337;SetProfile=Claude\007"
+    command claude --dangerously-skip-permissions "$@"
+    echo -ne "\033]1337;SetProfile=${prev_profile}\007"
+  }
+else
+  alias claude='claude --dangerously-skip-permissions'
+fi
 
 # GPU whisper (RTX 5070 Ti / cu128 venv) — replaces removed brew CPU whisper
 alias whisper='$HOME/venvs/whisper-gpu/bin/whisper --device cuda'
