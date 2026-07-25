@@ -189,6 +189,38 @@ blender() {
         "$@"
 }
 
+# Grouped tmux attach on the Mac (per /tmp/tmux.md on mbp): shares the base session's
+# windows but keeps this client's own geometry/current-window. `t work` joins an
+# existing base session; `tnew work [dir]` creates one.
+t() {
+  local s=${1:?usage: t <session>}
+  ssh -t mbp "tmux has-session -t='$s' 2>/dev/null && exec tmux new-session -A -t '$s' -s '$s-ssh'"
+}
+tnew() { ssh -t mbp "exec tmux new-session -A -s ${1:?usage: tnew <session>} -c ${2:-\$HOME}"; }
+# Completion off the Mac's base sessions (grouped client sessions end in -ssh, filtered out).
+_t() { compadd -- $(ssh mbp 'tmux ls -F "#{session_name}"' 2>/dev/null | grep -v -- '-ssh$'); }
+(( $+functions[compdef] )) && compdef _t t
+
+# --- Mac <-> WSL2 sshfs mounts (ssh alias `mbp` + reverse tunnel) ---
+# A: mount the MacBook's filesystem locally at /mnt/mac
+macmount()   { mount | grep -q ' /mnt/mac ' && { echo "/mnt/mac already mounted"; return; }; sshfs mbp:/ /mnt/mac -o reconnect,follow_symlinks,idmap=user,ServerAliveInterval=15,ServerAliveCountMax=3,Ciphers=aes128-gcm@openssh.com,cache=yes,kernel_cache,cache_timeout=60,max_conns=4 && echo "mounted /mnt/mac"; }
+macunmount() { fusermount3 -uz /mnt/mac 2>/dev/null && echo "unmounted /mnt/mac" || echo "/mnt/mac not mounted"; }
+
+# B: expose THIS WSL2 box to the Mac and mount it there at /private/tmp/wsl.
+#    Mounted under /tmp so macOS Spotlight never indexes the remote tree.
+#    The Mac can't reach WSL2 directly (Windows firewall blocks inbound), so the
+#    reverse tunnel must originate here. wslmount ensures a ControlMaster tunnel
+#    is up, then mounts remotely over that same connection.
+WSL_TUNNEL_SOCK=/home/dane/.ssh/cm-mbp-tunnel.sock
+wslmount() {
+  ssh -S "$WSL_TUNNEL_SOCK" -O check mbp 2>/dev/null || ssh -f -N -M -S "$WSL_TUNNEL_SOCK" mbp
+  ssh -S "$WSL_TUNNEL_SOCK" mbp 'mkdir -p /private/tmp/wsl; if mount | grep -q "/private/tmp/wsl"; then echo "/tmp/wsl already mounted on Mac"; else /opt/homebrew/bin/sshfs reverse:/ /private/tmp/wsl -o reconnect,follow_symlinks,idmap=user,volname=wsl,Ciphers=aes128-gcm@openssh.com,cache=yes,kernel_cache,cache_timeout=60,max_conns=4 && echo "mounted /tmp/wsl on Mac"; fi'
+}
+wslunmount() {
+  ssh mbp 'umount /private/tmp/wsl 2>/dev/null || diskutil unmount force /private/tmp/wsl 2>/dev/null; echo "/tmp/wsl unmounted"' 2>/dev/null
+  ssh -S "$WSL_TUNNEL_SOCK" -O exit mbp 2>/dev/null && echo "tunnel closed" || echo "no tunnel to close"
+}
+
 # ============================================================================
 # System-specific overrides
 # ============================================================================
