@@ -97,7 +97,15 @@ configure_zsh() {
     if symlink_config "$SCRIPT_DIR/.zshrc" "$HOME/.zshrc"; then
         echo "✓ Symlinked .zshrc"
     fi
-    
+
+    # Symlink .zshenv
+    # WHY: non-login shells (ssh mbp '<cmd>') skip both .zshrc and /etc/zprofile,
+    # and /etc/zprofile is where path_helper adds /opt/homebrew/bin. Without this,
+    # Homebrew binaries are unreachable over SSH.
+    if symlink_config "$SCRIPT_DIR/.zshenv" "$HOME/.zshenv"; then
+        echo "✓ Symlinked .zshenv"
+    fi
+
     local current_shell=$(basename "$SHELL")
 
     if [[ "$current_shell" != "zsh" ]]; then
@@ -141,6 +149,24 @@ configure_zsh() {
 # ============================================================================
 
 # Install Homebrew if not present
+configure_tmux() {
+    if symlink_config "$SCRIPT_DIR/.tmux.conf" "$HOME/.tmux.conf"; then
+        echo "✓ Symlinked .tmux.conf"
+    fi
+
+    # tpm — required for tmux-resurrect/tmux-continuum, which restore session
+    # layouts across reboots. .tmux.conf guards the tpm run line, so a missing
+    # clone degrades quietly rather than erroring on every config load.
+    if [[ ! -d "$HOME/.tmux/plugins/tpm" ]]; then
+        if git clone --depth 1 https://github.com/tmux-plugins/tpm "$HOME/.tmux/plugins/tpm" 2>/dev/null; then
+            echo "✓ Installed tpm"
+            echo "  Note: run 'prefix + I' inside tmux to fetch resurrect/continuum"
+        else
+            echo "⊘ Could not clone tpm"
+        fi
+    fi
+}
+
 install_homebrew() {
     # Less verbose, we don't need all the hints
     export HOMEBREW_NO_ENV_HINTS=1
@@ -213,6 +239,7 @@ install_homebrew_packages() {
     local deps=(
         gum
         btop      # Not available via mise on some platforms
+        tmux
     )
     # Note: gnupg is installed earlier in install_and_configure_mise()
 
@@ -698,6 +725,7 @@ main() {
     cleanup_homebrew_tools
 
     configure_zsh
+    configure_tmux
 
     # Symlink explicitly-allowlisted zsh.d snippets from the repo (platform-guarded).
     link_zsh_d_snippets
