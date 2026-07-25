@@ -173,14 +173,38 @@ alias bootstrap='bash <(curl -fsSL https://coffer.medieval.software/bootstrap) &
 
 # Life on the edge baby
 # The function swaps the iTerm profile for the duration of the session and restores
-# it on exit. Gated on $ITERM_PROFILE: this rc file is shared with WSL2, where the
-# escape codes would just be inert noise written to Windows Terminal.
-if [[ -n "$ITERM_PROFILE" ]]; then
+# it on exit. Gated on macOS: this rc file is shared with WSL2, where the escape
+# codes would just be inert noise written to Windows Terminal.
+#
+# Not gated on $ITERM_PROFILE. The tmux server is launchd-spawned (see
+# software.medieval.tmux-server.plist), so panes inherit launchd's environment and
+# never see iTerm2's vars at all — the gate was silently taking the alias branch.
+#
+# Must precede the `if`: re-sourcing this file in a shell that took the alias branch
+# would otherwise alias-expand the `claude()` token at parse time and fail with
+# "defining function based on alias". zsh parses the whole if/fi as one unit, so an
+# unalias inside the block runs too late to help.
+unalias claude 2>/dev/null
+if [[ "$OSTYPE" == darwin* ]]; then
+  # tmux discards OSC sequences it doesn't recognise; DCS passthrough gets this to
+  # iTerm2 intact, and needs `allow-passthrough on` in .tmux.conf.
+  _iterm_set_profile() {
+    if [[ -n "$TMUX" ]]; then
+      printf '\033Ptmux;\033\033]1337;SetProfile=%s\007\033\\' "$1"
+    else
+      printf '\033]1337;SetProfile=%s\007' "$1"
+    fi
+  }
+
   claude() {
     local prev_profile="$ITERM_PROFILE"
-    echo -ne "\033]1337;SetProfile=Claude\007"
+    if [[ -z "$prev_profile" ]]; then
+      # -CC panes run under the "tmux" profile; bare iTerm2 falls back to Default.
+      [[ -n "$TMUX" ]] && prev_profile=tmux || prev_profile=Default
+    fi
+    _iterm_set_profile Claude
     command claude --dangerously-skip-permissions "$@"
-    echo -ne "\033]1337;SetProfile=${prev_profile}\007"
+    _iterm_set_profile "$prev_profile"
   }
 else
   alias claude='claude --dangerously-skip-permissions'
