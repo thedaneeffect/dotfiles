@@ -59,6 +59,8 @@ glow = "latest"
 watchexec = "latest"
 aqua = "2.57.2"
 task = "latest"
+mutagen = "latest"
+java = "temurin-21"
 # Machine-local tools (e.g. godot on the Mac) go in ~/.config/mise/conf.d/*.toml,
 # which mise layers on top of this file and which is not tracked here — setup.sh
 # runs a blanket `mise install`, so anything added above installs on every machine.

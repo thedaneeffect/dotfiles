@@ -25,6 +25,15 @@ export PATH="$HOME/go/bin:$PATH"
 export MISE_EXPERIMENTAL=1
 export GPG_TTY=$(tty)
 
+# sudo falls back to an askpass helper when no tty is available -- Touch ID via
+# pam_tid can't fire there either. Renders a native dialog instead of failing.
+# Gated on macOS: the helper wraps pinentry-mac, which doesn't exist on WSL2.
+# Also gated on the helper being present, so a freshly bootstrapped Mac doesn't
+# point sudo at a missing program.
+if [[ "$OSTYPE" == darwin* && -x "$HOME/.local/bin/askpass-pinentry" ]]; then
+  export SUDO_ASKPASS="$HOME/.local/bin/askpass-pinentry"
+fi
+
 # ============================================================================
 # Agent / non-interactive shell detection
 # ============================================================================
